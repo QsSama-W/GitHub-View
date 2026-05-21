@@ -54,7 +54,6 @@
             text-decoration: none !important;
             -webkit-text-decoration: none !important;
         }
-        /* 页脚链接样式 */
         .footer-link {
             color: #94a3b8;
             text-decoration: none !important;
@@ -137,15 +136,16 @@
 
     <!-- 页脚 -->
     <footer class="bg-gray-800 text-white py-8 mt-16">
-        <div class="container mx-auto px-4 text-center">
+        <div class="container mx-auto px-4 text-center space-y-2">
+            <p class="text-gray-400 text-sm">© 2025-2026 GitHub View</p>
             <p class="text-gray-400 text-sm leading-relaxed">
-                © 2025-2026 GitHub View &nbsp;|&nbsp; 本项目由
+                本项目由
                 <a href="https://aistudio.xiaomimimo.com" target="_blank" rel="noopener noreferrer" class="footer-link">MiMo</a>
                 &amp;
                 <a href="https://github.com/QsSama-W" target="_blank" rel="noopener noreferrer" class="footer-link">QsSama-W</a>
                 提供技术支持，
-                <a href="https://pages.github.com" target="_blank" rel="noopener noreferrer" class="footer-link">GitHub Pages</a>
-                提供网站边缘安全加速支持
+                <a href="https://pages.github.com/" target="_blank" rel="noopener noreferrer" class="footer-link">GitHub Pages</a>
+                提供网站托管及边缘安全加速支持
             </p>
         </div>
     </footer>
@@ -164,7 +164,7 @@
 
         document.addEventListener('DOMContentLoaded', () => {
             fetchProjects();
-            
+
             sortNewestButton.addEventListener('click', () => {
                 if (sortOrder !== 'newest') {
                     sortOrder = 'newest';
@@ -175,7 +175,7 @@
                     renderProjects();
                 }
             });
-            
+
             sortOldestButton.addEventListener('click', () => {
                 if (sortOrder !== 'oldest') {
                     sortOrder = 'oldest';
@@ -193,24 +193,24 @@
                 loadingIndicator.classList.remove('hidden');
                 errorIndicator.classList.add('hidden');
                 emptyIndicator.classList.add('hidden');
-                
+
                 const response = await fetch('https://api.github.com/users/QsSama-W/repos?per_page=100');
-                
+
                 if (!response.ok) {
                     throw new Error(`HTTP error! Status: ${response.status}`);
                 }
-                
+
                 const data = await response.json();
                 projects = data;
-                
+
                 loadingIndicator.classList.add('hidden');
-                
+
                 if (projects.length === 0) {
                     emptyIndicator.classList.remove('hidden');
                 } else {
                     renderProjects();
                 }
-                
+
             } catch (error) {
                 console.error('Error fetching projects:', error);
                 loadingIndicator.classList.add('hidden');
@@ -221,13 +221,13 @@
         function renderProjects() {
             projectsContainer.innerHTML = '';
             projectCountElement.textContent = `(${projects.length} 个项目)`;
-            
+
             const sortedProjects = [...projects].sort((a, b) => {
                 const dateA = new Date(a.updated_at);
                 const dateB = new Date(b.updated_at);
                 return sortOrder === 'newest' ? dateB - dateA : dateA - dateB;
             });
-            
+
             sortedProjects.forEach((project, index) => {
                 setTimeout(() => {
                     const card = createProjectCard(project);
@@ -239,17 +239,17 @@
         function createProjectCard(project) {
             const card = document.createElement('div');
             card.className = 'project-card fade-in';
-            
+
             const updatedDate = new Date(project.updated_at);
             const formattedDate = updatedDate.toLocaleDateString('zh-CN', {
                 year: 'numeric',
                 month: 'long',
                 day: 'numeric'
             });
-            
+
             const description = project.description || '<span class="text-gray-400 italic">无描述</span>';
             const stars = project.stargazers_count > 0 ? project.stargazers_count : 0;
-            
+
             card.innerHTML = `
                 <div class="p-6">
                     <div class="flex justify-between items-start mb-3">
@@ -280,7 +280,7 @@
                     </div>
                 </div>
             `;
-            
+
             return card;
         }
     </script>
