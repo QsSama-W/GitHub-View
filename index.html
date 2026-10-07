@@ -21,10 +21,13 @@
             theme: {
                 extend: {
                     colors: {
-                        primary: '#2563eb',
-                        secondary: '#64748b',
-                        dark: '#1e293b',
-                        light: '#f8fafc'
+                        primary: 'rgb(var(--c-accent) / <alpha-value>)',
+                        canvas: 'rgb(var(--c-canvas) / <alpha-value>)',
+                        surface: 'rgb(var(--c-surface) / <alpha-value>)',
+                        elevated: 'rgb(var(--c-elevated) / <alpha-value>)',
+                        line: 'rgb(var(--c-line) / <alpha-value>)',
+                        ink: 'rgb(var(--c-ink) / <alpha-value>)',
+                        muted: 'rgb(var(--c-muted) / <alpha-value>)',
                     },
                     fontFamily: {
                         sans: ['Inter', 'system-ui', '-apple-system', 'Segoe UI', 'sans-serif'],
@@ -34,21 +37,62 @@
         }
     </script>
     <style type="text/tailwindcss">
+        /* ===== 双主题色板（变量驱动，无需到处写 dark: 前缀） ===== */
+        :root {
+            --c-canvas:   244 247 251;   /* 页面底色 */
+            --c-surface:  255 255 255;   /* 卡片 / 头部 */
+            --c-elevated: 241 245 249;   /* 输入框 / pill 底 */
+            --c-line:     226 232 240;   /* 描边 */
+            --c-ink:      15 23 42;      /* 主文字 */
+            --c-muted:    100 116 139;   /* 次要文字 */
+            --c-accent:   37 99 235;     /* 主色 */
+            --c-glow:     139 92 246;    /* 环境光（紫） */
+            --glow-opacity: .10;
+        }
+        .dark {
+            --c-canvas:   9 14 26;       /* 深空蓝，不再是死灰 */
+            --c-surface:  17 25 42;      /* 卡片 */
+            --c-elevated: 24 34 55;      /* 输入框 / pill */
+            --c-line:     36 50 76;      /* 描边（比卡片亮一档，有层次） */
+            --c-ink:      231 238 252;   /* 主文字：冷白，不刺眼 */
+            --c-muted:    148 165 195;   /* 次要文字 */
+            --c-accent:   96 165 250;    /* 深色下主色提亮 */
+            --c-glow:     59 130 246;
+            --glow-opacity: .22;
+        }
+
         @layer utilities {
             .project-card {
-                @apply bg-white dark:bg-gray-800 rounded-xl border border-gray-200/70 dark:border-gray-700/60 overflow-hidden transition-all duration-300;
+                @apply bg-surface border border-line rounded-xl overflow-hidden transition-all duration-300;
             }
             .project-card:hover {
-                @apply -translate-y-1 shadow-xl shadow-gray-300/40 dark:shadow-black/40 border-primary/40;
+                @apply -translate-y-1 border-primary/45;
+                box-shadow: 0 14px 34px -12px rgb(var(--c-accent) / .28), 0 4px 12px rgb(0 0 0 / .06);
+            }
+            .dark .project-card:hover {
+                box-shadow: 0 16px 36px -12px rgb(0 0 0 / .65), 0 0 0 1px rgb(var(--c-accent) / .18);
             }
             .fade-in { animation: fadeIn .45s cubic-bezier(.22,1,.36,1) both; }
             @keyframes fadeIn {
                 from { opacity: 0; transform: translateY(14px); }
                 to   { opacity: 1; transform: translateY(0); }
             }
+            .chip { @apply text-xs px-2.5 py-1 rounded-full border transition-colors duration-200; }
+            .chip-off { @apply bg-surface text-muted border-line hover:border-primary/60 hover:text-primary; }
+            .chip-on  { @apply bg-primary text-white border-primary; }
+            .stat-pill { @apply flex items-center gap-1.5 text-sm px-3 py-1.5 rounded-full bg-surface border border-line text-muted; }
         }
 
-        /* ===== 隐藏所有滚动条（纵向/横向），但保留滚动能力 ===== */
+        /* 顶部环境光：纯色底太闷，加两团很淡的渐变 */
+        body::before {
+            content: '';
+            position: fixed; inset: 0; z-index: -1; pointer-events: none;
+            background:
+                radial-gradient(900px 520px at 10% -10%, rgb(var(--c-accent) / var(--glow-opacity)), transparent 62%),
+                radial-gradient(760px 440px at 92% 4%,   rgb(var(--c-glow)   / var(--glow-opacity)), transparent 62%);
+        }
+
+        /* ===== 隐藏所有滚动条（纵向/横向），保留滚动能力 ===== */
         html, body { overflow-x: hidden; }
         *, *::before, *::after {
             scrollbar-width: none !important;
@@ -68,71 +112,67 @@
         .running-days-badge {
             background: linear-gradient(135deg, #2563eb 0%, #1e40af 100%);
             color: #fff;
-            padding: 1px 9px;
+            padding: 1px 8px;
             border-radius: 999px;
             font-weight: 600;
-            font-size: 12px;
+            font-size: 11px;
+            line-height: 1.5;
             display: inline-block;
+            vertical-align: middle;
             box-shadow: 0 2px 8px rgba(37, 99, 235, .28);
         }
+        .dark .running-days-badge {
+            background: linear-gradient(135deg, #3b82f6 0%, #7c3aed 100%);
+            box-shadow: 0 2px 10px rgba(59, 130, 246, .35);
+        }
 
-        #theme-icon { transition: transform .3s ease; }
-        #theme-toggle:active #theme-icon { transform: scale(.8) rotate(90deg); }
+        #theme-icon { transition: transform .35s cubic-bezier(.34,1.56,.64,1); }
+        #theme-toggle:active #theme-icon { transform: scale(.75) rotate(-90deg); }
 
         .glass-header {
-            background: rgba(255,255,255,.72);
-            backdrop-filter: saturate(180%) blur(12px);
-            -webkit-backdrop-filter: saturate(180%) blur(12px);
-        }
-        .dark .glass-header {
-            background: rgba(17,24,39,.72);
+            background: rgb(var(--c-surface) / .72);
+            backdrop-filter: saturate(180%) blur(14px);
+            -webkit-backdrop-filter: saturate(180%) blur(14px);
         }
 
         .lang-dot { width: 9px; height: 9px; border-radius: 999px; display: inline-block; flex: none; }
-
-        .chip {
-            @apply text-xs px-2.5 py-1 rounded-full border transition-colors duration-200;
-        }
-        .chip-off {
-            @apply bg-white dark:bg-gray-800 text-gray-500 dark:text-gray-400 border-gray-200 dark:border-gray-600 hover:border-primary/60 hover:text-primary dark:hover:text-primary;
-        }
-        .chip-on {
-            @apply bg-primary text-white border-primary shadow-sm shadow-primary/30;
-        }
-
-        .stat-pill {
-            @apply flex items-center gap-1.5 text-sm px-3 py-1.5 rounded-full bg-white dark:bg-gray-800 border border-gray-200/80 dark:border-gray-700/70 text-gray-600 dark:text-gray-300;
-        }
     </style>
 </head>
-<body class="bg-gray-50 dark:bg-gray-900 text-gray-800 dark:text-gray-100 min-h-screen flex flex-col transition-colors duration-300 antialiased">
+<body class="bg-canvas text-ink min-h-screen flex flex-col transition-colors duration-300 antialiased">
 
-    <header class="glass-header shadow-sm sticky top-0 z-50 shrink-0 border-b border-gray-200/70 dark:border-gray-800 transition-colors duration-300">
+    <header class="glass-header shadow-sm sticky top-0 z-50 shrink-0 border-b border-line transition-colors duration-300">
         <div class="container mx-auto px-4 py-3 flex flex-col md:flex-row justify-between items-center gap-3">
             <div class="flex items-center">
-                <span class="w-9 h-9 rounded-xl bg-gradient-to-br from-gray-800 to-black dark:from-gray-100 dark:to-white flex items-center justify-center mr-3 shadow-sm">
+                <span class="w-9 h-9 rounded-xl bg-gradient-to-br from-gray-800 to-black dark:from-slate-200 dark:to-white flex items-center justify-center mr-3 shadow-sm">
                     <i class="fa fa-github text-lg text-white dark:text-gray-900"></i>
                 </span>
                 <h1 class="text-xl font-bold tracking-tight">GitHub&nbsp;View</h1>
+                <span class="inline-flex items-center ml-2.5 text-[11px] text-muted whitespace-nowrap">
+                    已稳定运行&nbsp;<span id="running-days" class="running-days-badge">0</span>&nbsp;天
+                </span>
             </div>
 
             <div class="flex items-center space-x-2">
                 <div class="relative hidden sm:block">
-                    <i class="fa fa-search absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 text-xs"></i>
+                    <i class="fa fa-search absolute left-3 top-1/2 -translate-y-1/2 text-muted text-xs"></i>
                     <input id="search-input" type="text" placeholder="搜索项目…"
-                        class="w-44 md:w-56 pl-8 pr-3 py-1.5 text-sm rounded-full bg-gray-100 dark:bg-gray-700/70 border border-transparent focus:border-primary/60 focus:bg-white dark:focus:bg-gray-700 outline-none transition-all duration-200 text-gray-700 dark:text-gray-100 placeholder-gray-400">
+                        class="w-44 md:w-56 pl-8 pr-3 py-1.5 text-sm rounded-full bg-elevated border border-transparent focus:border-primary/60 focus:bg-surface outline-none transition-all duration-200 text-ink placeholder-muted">
                 </div>
 
-                <button id="theme-toggle" class="w-9 h-9 rounded-full border border-gray-200 dark:border-gray-600 bg-gray-50 dark:bg-gray-700 flex items-center justify-center hover:bg-gray-100 dark:hover:bg-gray-600 transition-all duration-200 select-none" title="跟随系统">
-                    <i id="theme-icon" class="fa fa-circle-o text-gray-600 dark:text-gray-300 text-sm"></i>
+                <button id="theme-toggle"
+                    class="w-9 h-9 rounded-full border border-line bg-elevated flex items-center justify-center hover:border-primary/50 hover:text-primary transition-all duration-200 select-none"
+                    title="跟随系统">
+                    <i id="theme-icon" class="fa fa-desktop text-muted text-sm"></i>
                 </button>
 
+                <span class="w-px h-5 bg-line mx-0.5"></span>
+
                 <a id="github-profile-link" href="#" target="_blank" rel="noopener noreferrer" class="cursor-pointer select-none group">
-                    <div class="flex items-center bg-gray-100 dark:bg-gray-700/70 rounded-full px-3.5 py-1.5 transition-all duration-200 hover:bg-gray-200 dark:hover:bg-gray-600 border border-transparent hover:border-primary/40">
+                    <div class="flex items-center bg-elevated rounded-full px-3.5 py-1.5 transition-all duration-200 hover:bg-surface border border-transparent hover:border-primary/40">
                         <img id="avatar-img" alt="" class="w-5 h-5 rounded-full mr-2 hidden">
-                        <i id="avatar-fallback" class="fa fa-user-circle-o text-gray-500 dark:text-gray-400 mr-2"></i>
+                        <i id="avatar-fallback" class="fa fa-user-circle-o text-muted mr-2"></i>
                         <span class="font-medium text-sm" id="username-display"></span>
-                        <i class="fa fa-external-link text-[10px] ml-2 text-gray-400 opacity-0 group-hover:opacity-100 transition-opacity"></i>
+                        <i class="fa fa-external-link text-[10px] ml-2 text-muted opacity-0 group-hover:opacity-100 transition-opacity"></i>
                     </div>
                 </a>
             </div>
@@ -144,7 +184,7 @@
             <div>
                 <h2 class="text-lg font-semibold tracking-tight">
                     项目列表
-                    <span id="project-count" class="text-gray-400 dark:text-gray-500 text-sm font-normal ml-1">（加载中…）</span>
+                    <span id="project-count" class="text-muted text-sm font-normal ml-1">（加载中…）</span>
                 </h2>
                 <div id="stats-bar" class="flex flex-wrap items-center gap-2 mt-2.5"></div>
             </div>
@@ -163,14 +203,14 @@
         <div id="status-container">
             <div id="loading" class="flex justify-center items-center py-16">
                 <i class="fa fa-spinner fa-spin text-2xl text-primary mr-3"></i>
-                <p class="text-gray-500 dark:text-gray-400">正在加载项目数据…</p>
+                <p class="text-muted">正在加载项目数据…</p>
             </div>
-            <div id="error" class="hidden py-16 text-center text-red-500">
+            <div id="error" class="hidden py-16 text-center text-primary">
                 <i class="fa fa-exclamation-circle text-3xl mb-3 block"></i>
                 <p>加载项目时出错，请稍后重试</p>
-                <button onclick="fetchProjects()" class="mt-3 text-sm px-4 py-1.5 rounded-full border border-red-300 hover:bg-red-50 dark:hover:bg-red-900/20 transition">重新加载</button>
+                <button onclick="fetchProjects()" class="mt-3 text-sm px-4 py-1.5 rounded-full border border-primary/50 hover:bg-primary/10 transition">重新加载</button>
             </div>
-            <div id="empty" class="hidden py-16 text-center text-gray-400 dark:text-gray-500">
+            <div id="empty" class="hidden py-16 text-center text-muted">
                 <i class="fa fa-folder-open-o text-3xl mb-3 block"></i>
                 <p>未找到匹配的项目</p>
             </div>
@@ -178,14 +218,6 @@
 
         <div id="projects-container" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5"></div>
     </main>
-
-    <footer class="shrink-0 border-t border-gray-200/70 dark:border-gray-800 bg-white/60 dark:bg-gray-800/40 transition-colors duration-300">
-        <div class="container mx-auto px-4 py-1.5 text-center">
-            <p class="text-gray-400 dark:text-gray-500 text-xs">
-                已稳定运行 <span id="running-days" class="running-days-badge">0</span> 天
-            </p>
-        </div>
-    </footer>
 
     <script>
         const THEME_KEY = 'theme-preference';
@@ -196,7 +228,6 @@
         const loadingIndicator = document.getElementById('loading');
         const errorIndicator = document.getElementById('error');
         const emptyIndicator = document.getElementById('empty');
-        const statusContainer = document.getElementById('status-container');
         const projectCountElement = document.getElementById('project-count');
         const sortNewestButton = document.getElementById('sort-newest');
         const sortOldestButton = document.getElementById('sort-oldest');
@@ -215,10 +246,12 @@
         function updateThemeButton() {
             const icon = document.getElementById('theme-icon');
             const btn = document.getElementById('theme-toggle');
-            const iconMap = { system: 'fa-circle-o', light: 'fa-sun-o', dark: 'fa-moon-o' };
-            const labelMap = { system: '跟随系统', light: '浅色模式', dark: '深色模式' };
-            icon.className = 'fa ' + iconMap[currentTheme] + ' text-gray-600 dark:text-gray-300 text-sm';
+            // 跟随系统 = 显示器图标，比原来的空心圆好认
+            const iconMap = { system: 'fa-desktop', light: 'fa-sun-o', dark: 'fa-moon-o' };
+            const labelMap = { system: '跟随系统（点击切换）', light: '浅色模式（点击切换）', dark: '深色模式（点击切换）' };
+            icon.className = 'fa ' + iconMap[currentTheme] + ' text-muted text-sm';
             btn.title = labelMap[currentTheme];
+            btn.dataset.state = currentTheme;
         }
 
         /* ---------- 语言配色 ---------- */
@@ -403,7 +436,7 @@
             const lang = project.language || '未知';
             const desc = project.description
                 ? escapeHTML(project.description)
-                : '<span class="text-gray-400 dark:text-gray-500 italic">暂无描述</span>';
+                : '<span class="text-muted/70 italic">暂无描述</span>';
 
             card.innerHTML = `
                 <div class="p-5 flex flex-col flex-1">
@@ -417,9 +450,9 @@
                         </span>
                     </div>
 
-                    <p class="text-gray-500 dark:text-gray-400 text-[13px] leading-relaxed mb-4 line-clamp-2">${desc}</p>
+                    <p class="text-muted text-[13px] leading-relaxed mb-4 line-clamp-2">${desc}</p>
 
-                    <div class="mt-auto flex items-center justify-between text-xs text-gray-400 dark:text-gray-500 pt-3 border-t border-gray-100 dark:border-gray-700/60">
+                    <div class="mt-auto flex items-center justify-between text-xs text-muted/80 pt-3 border-t border-line">
                         <div class="flex items-center space-x-3.5">
                             <span class="flex items-center"><i class="fa fa-star-o mr-1"></i>${project.stargazers_count}</span>
                             <span class="flex items-center"><i class="fa fa-code-fork mr-1"></i>${project.forks_count}</span>
