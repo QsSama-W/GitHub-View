@@ -2,7 +2,7 @@
 <html lang="zh-CN">
 <head>
     <script>
-        (function() {
+        (function () {
             var t = localStorage.getItem('theme-preference') || 'system';
             var d = t === 'dark' || (t === 'system' && window.matchMedia('(prefers-color-scheme: dark)').matches);
             if (d) document.documentElement.classList.add('dark');
@@ -27,7 +27,7 @@
                         light: '#f8fafc'
                     },
                     fontFamily: {
-                        sans: ['Inter', 'system-ui', 'sans-serif'],
+                        sans: ['Inter', 'system-ui', '-apple-system', 'Segoe UI', 'sans-serif'],
                     },
                 }
             }
@@ -36,135 +36,153 @@
     <style type="text/tailwindcss">
         @layer utilities {
             .project-card {
-                @apply bg-white rounded-lg shadow-md overflow-hidden transition-all duration-300 hover:shadow-lg hover:-translate-y-1;
+                @apply bg-white dark:bg-gray-800 rounded-xl border border-gray-200/70 dark:border-gray-700/60 overflow-hidden transition-all duration-300;
             }
-            .dark .project-card {
-                @apply bg-gray-800;
+            .project-card:hover {
+                @apply -translate-y-1 shadow-xl shadow-gray-300/40 dark:shadow-black/40 border-primary/40;
             }
-            .fade-in { animation: fadeIn 0.5s ease-in; }
+            .fade-in { animation: fadeIn .45s cubic-bezier(.22,1,.36,1) both; }
             @keyframes fadeIn {
-                from { opacity: 0; transform: translateY(10px); }
+                from { opacity: 0; transform: translateY(14px); }
                 to   { opacity: 1; transform: translateY(0); }
             }
         }
-        * {
-            scrollbar-width: none;
-            -ms-overflow-style: none;
+
+        /* ===== 隐藏所有滚动条（纵向/横向），但保留滚动能力 ===== */
+        html, body { overflow-x: hidden; }
+        *, *::before, *::after {
+            scrollbar-width: none !important;
+            -ms-overflow-style: none !important;
         }
-        *::-webkit-scrollbar {
-            display: none;
-        }
+        *::-webkit-scrollbar { width: 0 !important; height: 0 !important; display: none !important; }
+
         #github-profile-link {
             text-decoration: none !important;
             color: inherit;
-            -webkit-text-decoration: none;
             -webkit-tap-highlight-color: transparent;
         }
-        #github-profile-link:hover,
-        #github-profile-link *,
-        #github-profile-link *::before,
-        #github-profile-link *::after {
+        #github-profile-link *, #github-profile-link *::before, #github-profile-link *::after {
             text-decoration: none !important;
-            -webkit-text-decoration: none !important;
         }
-        .footer-link {
-            color: #6b7280;
-            text-decoration: none !important;
-            -webkit-text-decoration: none !important;
-            transition: color 0.2s ease;
-            position: relative;
-        }
-        .dark .footer-link { color: #94a3b8; }
-        .footer-link::after {
-            content: '';
-            position: absolute;
-            left: 0;
-            bottom: -1px;
-            width: 0;
-            height: 1px;
-            background: #60a5fa;
-            transition: width 0.3s ease;
-        }
-        .footer-link:hover { color: #2563eb; }
-        .dark .footer-link:hover { color: #60a5fa; }
-        .footer-link:hover::after { width: 100%; }
+
         .running-days-badge {
             background: linear-gradient(135deg, #2563eb 0%, #1e40af 100%);
-            color: white;
-            padding: 2px 10px;
-            border-radius: 20px;
+            color: #fff;
+            padding: 1px 9px;
+            border-radius: 999px;
             font-weight: 600;
-            display: inline-flex;
-            align-items: center;
-            box-shadow: 0 2px 8px rgba(37, 99, 235, 0.3);
+            font-size: 12px;
+            display: inline-block;
+            box-shadow: 0 2px 8px rgba(37, 99, 235, .28);
         }
-        #theme-icon { transition: transform 0.3s ease; }
-        #theme-toggle:active #theme-icon { transform: scale(0.8); }
+
+        #theme-icon { transition: transform .3s ease; }
+        #theme-toggle:active #theme-icon { transform: scale(.8) rotate(90deg); }
+
+        .glass-header {
+            background: rgba(255,255,255,.72);
+            backdrop-filter: saturate(180%) blur(12px);
+            -webkit-backdrop-filter: saturate(180%) blur(12px);
+        }
+        .dark .glass-header {
+            background: rgba(17,24,39,.72);
+        }
+
+        .lang-dot { width: 9px; height: 9px; border-radius: 999px; display: inline-block; flex: none; }
+
+        .chip {
+            @apply text-xs px-2.5 py-1 rounded-full border transition-colors duration-200;
+        }
+        .chip-off {
+            @apply bg-white dark:bg-gray-800 text-gray-500 dark:text-gray-400 border-gray-200 dark:border-gray-600 hover:border-primary/60 hover:text-primary dark:hover:text-primary;
+        }
+        .chip-on {
+            @apply bg-primary text-white border-primary shadow-sm shadow-primary/30;
+        }
+
+        .stat-pill {
+            @apply flex items-center gap-1.5 text-sm px-3 py-1.5 rounded-full bg-white dark:bg-gray-800 border border-gray-200/80 dark:border-gray-700/70 text-gray-600 dark:text-gray-300;
+        }
     </style>
 </head>
-<body class="bg-gray-50 dark:bg-gray-900 text-gray-800 dark:text-gray-100 min-h-screen flex flex-col transition-colors duration-300">
+<body class="bg-gray-50 dark:bg-gray-900 text-gray-800 dark:text-gray-100 min-h-screen flex flex-col transition-colors duration-300 antialiased">
 
-    <header class="bg-white dark:bg-gray-800 shadow-sm sticky top-0 z-50 shrink-0 transition-colors duration-300">
-        <div class="container mx-auto px-4 py-4 flex flex-col md:flex-row justify-between items-center">
-            <div class="flex items-center mb-4 md:mb-0">
-                <i class="fa fa-github text-3xl text-gray-800 dark:text-gray-100 mr-3"></i>
-                <h1 class="text-2xl font-bold text-gray-800 dark:text-gray-100">GitHub View</h1>
+    <header class="glass-header shadow-sm sticky top-0 z-50 shrink-0 border-b border-gray-200/70 dark:border-gray-800 transition-colors duration-300">
+        <div class="container mx-auto px-4 py-3 flex flex-col md:flex-row justify-between items-center gap-3">
+            <div class="flex items-center">
+                <span class="w-9 h-9 rounded-xl bg-gradient-to-br from-gray-800 to-black dark:from-gray-100 dark:to-white flex items-center justify-center mr-3 shadow-sm">
+                    <i class="fa fa-github text-lg text-white dark:text-gray-900"></i>
+                </span>
+                <h1 class="text-xl font-bold tracking-tight">GitHub&nbsp;View</h1>
             </div>
-            <div class="flex items-center space-x-3">
-                <button id="theme-toggle" class="w-10 h-10 rounded-full border border-gray-200 dark:border-gray-600 bg-gray-50 dark:bg-gray-700 flex items-center justify-center hover:bg-gray-100 dark:hover:bg-gray-600 transition-all duration-200 select-none" title="跟随系统">
+
+            <div class="flex items-center space-x-2">
+                <div class="relative hidden sm:block">
+                    <i class="fa fa-search absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 text-xs"></i>
+                    <input id="search-input" type="text" placeholder="搜索项目…"
+                        class="w-44 md:w-56 pl-8 pr-3 py-1.5 text-sm rounded-full bg-gray-100 dark:bg-gray-700/70 border border-transparent focus:border-primary/60 focus:bg-white dark:focus:bg-gray-700 outline-none transition-all duration-200 text-gray-700 dark:text-gray-100 placeholder-gray-400">
+                </div>
+
+                <button id="theme-toggle" class="w-9 h-9 rounded-full border border-gray-200 dark:border-gray-600 bg-gray-50 dark:bg-gray-700 flex items-center justify-center hover:bg-gray-100 dark:hover:bg-gray-600 transition-all duration-200 select-none" title="跟随系统">
                     <i id="theme-icon" class="fa fa-circle-o text-gray-600 dark:text-gray-300 text-sm"></i>
                 </button>
-                <a id="github-profile-link" href="#" target="_blank" rel="noopener noreferrer" class="cursor-pointer select-none">
-                    <div class="flex items-center bg-gray-100 dark:bg-gray-700 rounded-full px-4 py-2 transition-all duration-200 hover:bg-gray-200 dark:hover:bg-gray-600 hover:shadow-sm">
-                        <i class="fa fa-user-circle-o text-gray-500 dark:text-gray-400 mr-2"></i>
-                        <span class="font-medium text-gray-800 dark:text-gray-100" id="username-display"></span>
+
+                <a id="github-profile-link" href="#" target="_blank" rel="noopener noreferrer" class="cursor-pointer select-none group">
+                    <div class="flex items-center bg-gray-100 dark:bg-gray-700/70 rounded-full px-3.5 py-1.5 transition-all duration-200 hover:bg-gray-200 dark:hover:bg-gray-600 border border-transparent hover:border-primary/40">
+                        <img id="avatar-img" alt="" class="w-5 h-5 rounded-full mr-2 hidden">
+                        <i id="avatar-fallback" class="fa fa-user-circle-o text-gray-500 dark:text-gray-400 mr-2"></i>
+                        <span class="font-medium text-sm" id="username-display"></span>
+                        <i class="fa fa-external-link text-[10px] ml-2 text-gray-400 opacity-0 group-hover:opacity-100 transition-opacity"></i>
                     </div>
                 </a>
             </div>
         </div>
     </header>
 
-    <main class="container mx-auto px-4 py-8 flex-1 transition-colors duration-300">
-        <div class="mb-8 flex flex-col md:flex-row justify-between items-center">
-            <h2 class="text-xl font-semibold mb-4 md:mb-0">项目列表 <span id="project-count" class="text-gray-500 dark:text-gray-400 text-base font-normal">(按更新日期排序)</span></h2>
-            <div class="flex space-x-2">
-                <button id="sort-newest" class="px-4 py-2 bg-primary text-white rounded-md hover:bg-primary/90 transition">
+    <main class="container mx-auto px-4 py-7 flex-1 transition-colors duration-300">
+        <div class="mb-6 flex flex-col lg:flex-row lg:items-center justify-between gap-4">
+            <div>
+                <h2 class="text-lg font-semibold tracking-tight">
+                    项目列表
+                    <span id="project-count" class="text-gray-400 dark:text-gray-500 text-sm font-normal ml-1">（加载中…）</span>
+                </h2>
+                <div id="stats-bar" class="flex flex-wrap items-center gap-2 mt-2.5"></div>
+            </div>
+
+            <div class="flex items-center space-x-2">
+                <div id="lang-filter" class="flex flex-wrap gap-1.5"></div>
+                <button id="sort-newest" class="chip chip-on whitespace-nowrap">
                     <i class="fa fa-sort-amount-desc mr-1"></i> 最新更新
                 </button>
-                <button id="sort-oldest" class="px-4 py-2 bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300 rounded-md hover:bg-gray-300 dark:hover:bg-gray-600 transition">
+                <button id="sort-oldest" class="chip chip-off whitespace-nowrap">
                     <i class="fa fa-sort-amount-asc mr-1"></i> 最早更新
                 </button>
             </div>
         </div>
 
-        <div id="status-container" class="mb-8 text-center">
-            <div id="loading" class="flex justify-center items-center py-8">
-                <i class="fa fa-spinner fa-spin text-3xl text-primary mr-3"></i>
-                <p class="text-lg text-gray-600 dark:text-gray-400">正在加载项目数据...</p>
+        <div id="status-container">
+            <div id="loading" class="flex justify-center items-center py-16">
+                <i class="fa fa-spinner fa-spin text-2xl text-primary mr-3"></i>
+                <p class="text-gray-500 dark:text-gray-400">正在加载项目数据…</p>
             </div>
-            <div id="error" class="hidden py-8 text-red-500">
-                <i class="fa fa-exclamation-circle text-3xl mr-3"></i>
-                <p class="text-lg">加载项目时出错，请稍后重试</p>
+            <div id="error" class="hidden py-16 text-center text-red-500">
+                <i class="fa fa-exclamation-circle text-3xl mb-3 block"></i>
+                <p>加载项目时出错，请稍后重试</p>
+                <button onclick="fetchProjects()" class="mt-3 text-sm px-4 py-1.5 rounded-full border border-red-300 hover:bg-red-50 dark:hover:bg-red-900/20 transition">重新加载</button>
             </div>
-            <div id="empty" class="hidden py-8 text-gray-500 dark:text-gray-400">
-                <i class="fa fa-folder-open-o text-3xl mr-3"></i>
-                <p class="text-lg">未找到任何项目</p>
+            <div id="empty" class="hidden py-16 text-center text-gray-400 dark:text-gray-500">
+                <i class="fa fa-folder-open-o text-3xl mb-3 block"></i>
+                <p>未找到匹配的项目</p>
             </div>
         </div>
 
-        <div id="projects-container" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"></div>
+        <div id="projects-container" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5"></div>
     </main>
 
-    <footer class="bg-gray-100 dark:bg-gray-800 shrink-0 transition-colors duration-300">
-        <div class="container mx-auto px-4 pt-3 text-center" style="padding-bottom: 10px;">
-            <p class="text-gray-500 dark:text-gray-400 text-sm mb-1">本项目已经稳定运行 <span id="running-days" class="running-days-badge">0</span> 天</p>
-            <p class="text-gray-500 dark:text-gray-400 text-sm leading-snug">
-                本项目由
-                <a href="https://aistudio.xiaomimimo.com" target="_blank" rel="noopener noreferrer" class="footer-link">MiMo</a>
-                &amp;
-                <a href="https://github.com/QsSama-W" target="_blank" rel="noopener noreferrer" class="footer-link">QsSama-W</a>
-                提供技术支持，<a href="https://pages.github.com/" target="_blank" rel="noopener noreferrer" class="footer-link">GitHub Pages</a>
-                提供网站托管及边缘安全加速支持
+    <footer class="shrink-0 border-t border-gray-200/70 dark:border-gray-800 bg-white/60 dark:bg-gray-800/40 transition-colors duration-300">
+        <div class="container mx-auto px-4 py-1.5 text-center">
+            <p class="text-gray-400 dark:text-gray-500 text-xs">
+                已稳定运行 <span id="running-days" class="running-days-badge">0</span> 天
             </p>
         </div>
     </footer>
@@ -178,10 +196,14 @@
         const loadingIndicator = document.getElementById('loading');
         const errorIndicator = document.getElementById('error');
         const emptyIndicator = document.getElementById('empty');
+        const statusContainer = document.getElementById('status-container');
         const projectCountElement = document.getElementById('project-count');
         const sortNewestButton = document.getElementById('sort-newest');
         const sortOldestButton = document.getElementById('sort-oldest');
+        const searchInput = document.getElementById('search-input');
+        const langFilter = document.getElementById('lang-filter');
 
+        /* ---------- 主题 ---------- */
         function applyTheme(theme) {
             currentTheme = theme;
             localStorage.setItem(THEME_KEY, theme);
@@ -195,53 +217,83 @@
             const btn = document.getElementById('theme-toggle');
             const iconMap = { system: 'fa-circle-o', light: 'fa-sun-o', dark: 'fa-moon-o' };
             const labelMap = { system: '跟随系统', light: '浅色模式', dark: '深色模式' };
-            icon.className = 'fa ' + iconMap[currentTheme] + ' text-sm';
+            icon.className = 'fa ' + iconMap[currentTheme] + ' text-gray-600 dark:text-gray-300 text-sm';
             btn.title = labelMap[currentTheme];
         }
 
+        /* ---------- 语言配色 ---------- */
+        const LANG_COLORS = {
+            JavaScript: '#f1e05a', TypeScript: '#3178c6', Python: '#3572A5', Java: '#b07219',
+            Go: '#00ADD8', Rust: '#dea584', C: '#555555', 'C++': '#f34b7d', 'C#': '#178600',
+            PHP: '#4F5D95', Ruby: '#701516', Swift: '#F05138', Kotlin: '#A97BFF', HTML: '#e34c26',
+            CSS: '#563d7c', Vue: '#41b883', Shell: '#89e051', Dart: '#00B4AB', Lua: '#000080',
+            Makefile: '#427819', Jupyter: '#DA5B0B', 'Jupyter Notebook': '#DA5B0B',
+            'Objective-C': '#438eff', Scala: '#c22d40', Perl: '#0298c3', R: '#198CE7',
+            Batchfile: '#C1F12E', PowerShell: '#012456', Dockerfile: '#384d54', Nix: '#7e7eff',
+            Astro: '#ff5a03', Svelte: '#ff3e00', Solidity: '#AA6746', Zig: '#ec915c',
+        };
+        const langColor = (l) => LANG_COLORS[l] || '#8b949e';
+
+        /* ---------- 数据 ---------- */
         let projects = [];
         let sortOrder = 'newest';
+        let keyword = '';
+        let activeLang = '全部';
+
+        function escapeHTML(s) {
+            return String(s ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+        }
+
+        function timeAgo(dateStr) {
+            const diff = (Date.now() - new Date(dateStr)) / 1000;
+            if (diff < 60) return '刚刚';
+            if (diff < 3600) return Math.floor(diff / 60) + ' 分钟前';
+            if (diff < 86400) return Math.floor(diff / 3600) + ' 小时前';
+            if (diff < 2592000) return Math.floor(diff / 86400) + ' 天前';
+            if (diff < 31536000) return Math.floor(diff / 2592000) + ' 个月前';
+            return Math.floor(diff / 31536000) + ' 年前';
+        }
 
         document.addEventListener('DOMContentLoaded', () => {
             applyTheme(currentTheme);
 
             document.getElementById('theme-toggle').addEventListener('click', () => {
-                const nextIndex = (themeOrder.indexOf(currentTheme) + 1) % themeOrder.length;
-                applyTheme(themeOrder[nextIndex]);
+                applyTheme(themeOrder[(themeOrder.indexOf(currentTheme) + 1) % themeOrder.length]);
             });
 
             window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', () => {
                 if (currentTheme === 'system') applyTheme('system');
             });
 
-            document.getElementById('username-display').textContent = githubConfig.username;
-            document.getElementById('github-profile-link').href = `https://github.com/${githubConfig.username}`;
+            const u = githubConfig.username;
+            document.getElementById('username-display').textContent = u;
+            document.getElementById('github-profile-link').href = `https://github.com/${u}`;
+            const av = document.getElementById('avatar-img');
+            av.src = `https://github.com/${u}.png?size=40`;
+            av.onload = () => { av.classList.remove('hidden'); document.getElementById('avatar-fallback').classList.add('hidden'); };
 
             updateRunningDays();
             fetchProjects();
 
-            sortNewestButton.addEventListener('click', () => {
-                if (sortOrder !== 'newest') {
-                    sortOrder = 'newest';
-                    sortNewestButton.classList.remove('bg-gray-200', 'dark:bg-gray-700', 'text-gray-700', 'dark:text-gray-300');
-                    sortNewestButton.classList.add('bg-primary', 'text-white');
-                    sortOldestButton.classList.remove('bg-primary', 'text-white');
-                    sortOldestButton.classList.add('bg-gray-200', 'dark:bg-gray-700', 'text-gray-700', 'dark:text-gray-300');
-                    renderProjects();
-                }
+            let timer;
+            searchInput.addEventListener('input', (e) => {
+                clearTimeout(timer);
+                timer = setTimeout(() => { keyword = e.target.value.trim().toLowerCase(); renderProjects(); }, 180);
             });
 
-            sortOldestButton.addEventListener('click', () => {
-                if (sortOrder !== 'oldest') {
-                    sortOrder = 'oldest';
-                    sortOldestButton.classList.remove('bg-gray-200', 'dark:bg-gray-700', 'text-gray-700', 'dark:text-gray-300');
-                    sortOldestButton.classList.add('bg-primary', 'text-white');
-                    sortNewestButton.classList.remove('bg-primary', 'text-white');
-                    sortNewestButton.classList.add('bg-gray-200', 'dark:bg-gray-700', 'text-gray-700', 'dark:text-gray-300');
-                    renderProjects();
-                }
-            });
+            sortNewestButton.addEventListener('click', () => setSort('newest'));
+            sortOldestButton.addEventListener('click', () => setSort('oldest'));
         });
+
+        function setSort(order) {
+            if (sortOrder === order) return;
+            sortOrder = order;
+            const on = [sortNewestButton, sortOldestButton][order === 'newest' ? 0 : 1];
+            const off = [sortNewestButton, sortOldestButton][order === 'newest' ? 1 : 0];
+            on.className = 'chip chip-on whitespace-nowrap';
+            off.className = 'chip chip-off whitespace-nowrap';
+            renderProjects();
+        }
 
         function updateRunningDays() {
             try {
@@ -249,12 +301,9 @@
                 const today = new Date();
                 const d1 = new Date(buildDate.getFullYear(), buildDate.getMonth(), buildDate.getDate());
                 const d2 = new Date(today.getFullYear(), today.getMonth(), today.getDate());
-                const daysDiff = Math.floor((d2 - d1) / (1000 * 60 * 60 * 24));
-                const el = document.getElementById('running-days');
-                if (el) el.textContent = daysDiff;
-            } catch (e) {
-                console.error('计算运行天数出错:', e);
-            }
+                document.getElementById('running-days').textContent =
+                    Math.floor((d2 - d1) / 86400000);
+            } catch (e) { console.error('计算运行天数出错:', e); }
         }
 
         async function fetchProjects() {
@@ -263,17 +312,15 @@
                 errorIndicator.classList.add('hidden');
                 emptyIndicator.classList.add('hidden');
 
-                const response = await fetch(`https://api.github.com/users/${githubConfig.username}/repos?per_page=100`);
+                const response = await fetch(`https://api.github.com/users/${githubConfig.username}/repos?per_page=100&sort=updated`);
                 if (!response.ok) throw new Error(`HTTP error! Status: ${response.status}`);
 
                 projects = await response.json();
                 loadingIndicator.classList.add('hidden');
 
-                if (projects.length === 0) {
-                    emptyIndicator.classList.remove('hidden');
-                } else {
-                    renderProjects();
-                }
+                buildLangFilter();
+                buildStats();
+                renderProjects();
             } catch (error) {
                 console.error('Error fetching projects:', error);
                 loadingIndicator.classList.add('hidden');
@@ -281,46 +328,104 @@
             }
         }
 
+        function buildStats() {
+            const stars = projects.reduce((s, p) => s + p.stargazers_count, 0);
+            const forks = projects.reduce((s, p) => s + p.forks_count, 0);
+            const langs = new Set(projects.map(p => p.language).filter(Boolean));
+            const bar = document.getElementById('stats-bar');
+            bar.innerHTML = `
+                <span class="stat-pill"><i class="fa fa-star-o text-amber-500"></i> ${stars} Stars</span>
+                <span class="stat-pill"><i class="fa fa-code-fork text-primary"></i> ${forks} Forks</span>
+                <span class="stat-pill"><i class="fa fa-code text-emerald-500"></i> ${langs.size} 种语言</span>
+            `;
+        }
+
+        function buildLangFilter() {
+            const counts = {};
+            projects.forEach(p => { const l = p.language || '未知'; counts[l] = (counts[l] || 0) + 1; });
+            const list = Object.entries(counts).sort((a, b) => b[1] - a[1]).slice(0, 6);
+            langFilter.innerHTML = '';
+            [['全部', projects.length], ...list].forEach(([name, n]) => {
+                const b = document.createElement('button');
+                b.className = 'chip ' + (name === activeLang ? 'chip-on' : 'chip-off') + ' whitespace-nowrap';
+                b.innerHTML = (name !== '全部' && name !== '未知'
+                    ? `<span class="lang-dot mr-1.5" style="background:${langColor(name)}"></span>` : '') +
+                    `${escapeHTML(name)} <span class="opacity-60 ml-0.5">${n}</span>`;
+                b.addEventListener('click', () => {
+                    activeLang = name;
+                    [...langFilter.children].forEach(c => {
+                        c.className = 'chip ' + (c === b ? 'chip-on' : 'chip-off') + ' whitespace-nowrap';
+                    });
+                    renderProjects();
+                });
+                langFilter.appendChild(b);
+            });
+        }
+
+        function getVisibleProjects() {
+            let list = projects;
+            if (activeLang !== '全部') {
+                list = list.filter(p => (p.language || '未知') === activeLang);
+            }
+            if (keyword) {
+                list = list.filter(p =>
+                    (p.name + ' ' + (p.description || '')).toLowerCase().includes(keyword));
+            }
+            return [...list].sort((a, b) => sortOrder === 'newest'
+                ? new Date(b.updated_at) - new Date(a.updated_at)
+                : new Date(a.updated_at) - new Date(b.updated_at));
+        }
+
         function renderProjects() {
+            const list = getVisibleProjects();
             projectsContainer.innerHTML = '';
-            projectCountElement.textContent = `(${projects.length} 个项目)`;
+            projectCountElement.textContent = `（${list.length} 个项目）`;
 
-            const sortedProjects = [...projects].sort((a, b) => {
-                return sortOrder === 'newest'
-                    ? new Date(b.updated_at) - new Date(a.updated_at)
-                    : new Date(a.updated_at) - new Date(b.updated_at);
-            });
+            if (list.length === 0) {
+                emptyIndicator.classList.remove('hidden');
+                return;
+            }
+            emptyIndicator.classList.add('hidden');
 
-            sortedProjects.forEach((project, index) => {
-                setTimeout(() => {
-                    projectsContainer.appendChild(createProjectCard(project));
-                }, index * 50);
+            const frag = document.createDocumentFragment();
+            list.forEach((project, index) => {
+                const card = createProjectCard(project);
+                card.style.animationDelay = Math.min(index, 20) * 35 + 'ms';
+                frag.appendChild(card);
             });
+            projectsContainer.appendChild(frag);
         }
 
         function createProjectCard(project) {
             const card = document.createElement('div');
-            card.className = 'project-card fade-in';
+            card.className = 'project-card fade-in flex flex-col';
 
-            const formattedDate = new Date(project.updated_at).toLocaleDateString('zh-CN', {
-                year: 'numeric', month: 'long', day: 'numeric'
-            });
+            const lang = project.language || '未知';
+            const desc = project.description
+                ? escapeHTML(project.description)
+                : '<span class="text-gray-400 dark:text-gray-500 italic">暂无描述</span>';
 
             card.innerHTML = `
-                <div class="p-6">
-                    <div class="flex justify-between items-start mb-3">
-                        <h3 class="text-lg font-semibold hover:text-primary transition-colors">
-                            <a href="${project.html_url}" target="_blank" rel="noopener noreferrer">${project.name}</a>
+                <div class="p-5 flex flex-col flex-1">
+                    <div class="flex justify-between items-start gap-3 mb-2.5">
+                        <h3 class="text-[15px] font-semibold leading-snug break-all">
+                            <a href="${project.html_url}" target="_blank" rel="noopener noreferrer"
+                               class="hover:text-primary transition-colors duration-200">${escapeHTML(project.name)}</a>
                         </h3>
-                        <span class="bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-300 text-xs px-2 py-1 rounded-full">${project.language || '未知'}</span>
+                        <span class="chip chip-off flex items-center flex-none">
+                            <span class="lang-dot mr-1.5" style="background:${langColor(lang)}"></span>${escapeHTML(lang)}
+                        </span>
                     </div>
-                    <p class="text-gray-600 dark:text-gray-400 text-sm mb-4">${project.description || '<span class="text-gray-400 dark:text-gray-500 italic">无描述</span>'}</p>
-                    <div class="flex items-center justify-between text-sm text-gray-500 dark:text-gray-400">
-                        <div class="flex items-center space-x-4">
-                            <span class="flex items-center"><i class="fa fa-star-o mr-1"></i> ${project.stargazers_count}</span>
-                            <span class="flex items-center"><i class="fa fa-code-fork mr-1"></i> ${project.forks_count}</span>
+
+                    <p class="text-gray-500 dark:text-gray-400 text-[13px] leading-relaxed mb-4 line-clamp-2">${desc}</p>
+
+                    <div class="mt-auto flex items-center justify-between text-xs text-gray-400 dark:text-gray-500 pt-3 border-t border-gray-100 dark:border-gray-700/60">
+                        <div class="flex items-center space-x-3.5">
+                            <span class="flex items-center"><i class="fa fa-star-o mr-1"></i>${project.stargazers_count}</span>
+                            <span class="flex items-center"><i class="fa fa-code-fork mr-1"></i>${project.forks_count}</span>
+                            ${project.size ? `<span class="hidden sm:flex items-center"><i class="fa fa-database mr-1"></i>${(project.size / 1024).toFixed(1)} MB</span>` : ''}
                         </div>
-                        <span>最后更新: ${formattedDate}</span>
+                        <span title="${new Date(project.updated_at).toLocaleString('zh-CN')}">${timeAgo(project.updated_at)}</span>
                     </div>
                 </div>
             `;
